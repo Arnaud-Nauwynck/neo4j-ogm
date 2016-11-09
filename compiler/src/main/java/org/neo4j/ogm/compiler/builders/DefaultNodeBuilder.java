@@ -88,4 +88,10 @@ public class DefaultNodeBuilder implements NodeBuilder {
     public Node node() {
         return node;
     }
+
+    @Override
+    public NodeBuilder setPrimaryIndex(String primaryIndexField) {
+        node.setPrimaryIndex(primaryIndexField);
+        return this;
+    }
 }

@@ -31,7 +31,7 @@ import org.neo4j.ogm.session.request.strategy.QueryStatements;
 public class NodeQueryStatements implements QueryStatements {
 
     @Override
-    public PagingAndSortingQuery findOne(Long id, int depth) {
+    public PagingAndSortingQuery findOne(Object id, int depth) {
         int max = max(depth);
         int min = min(max);
         if (depth < 0) {
@@ -121,7 +121,7 @@ public class NodeQueryStatements implements QueryStatements {
 
     private static class DepthZeroReadStrategy {
 
-        public static DefaultGraphModelRequest findOne(Long id) {
+        public static DefaultGraphModelRequest findOne(Object id) {
             return new DefaultGraphModelRequest("MATCH (n) WHERE ID(n) = { id } RETURN n", Utils.map("id", id));
         }
 
@@ -148,7 +148,7 @@ public class NodeQueryStatements implements QueryStatements {
 
     private static class InfiniteDepthReadStrategy {
 
-        public static DefaultGraphModelRequest findOne(Long id) {
+        public static DefaultGraphModelRequest findOne(Object id) {
             return new DefaultGraphModelRequest("MATCH (n) WHERE ID(n) = { id } WITH n MATCH p=(n)-[*0..]-(m) RETURN p", Utils.map("id", id));
         }
 

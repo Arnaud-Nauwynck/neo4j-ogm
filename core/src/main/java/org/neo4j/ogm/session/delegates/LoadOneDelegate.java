@@ -35,12 +35,12 @@ public class LoadOneDelegate implements Capability.LoadOne {
     }
 
     @Override
-    public <T> T load(Class<T> type, Long id) {
+    public <T, U> T load(Class<T> type, U id) {
         return load(type, id, 1);
     }
 
     @Override
-    public <T> T load(Class<T> type, Long id, int depth) {
+    public <T, U> T load(Class<T> type, U id, int depth) {
         QueryStatements queryStatements = session.queryStatementsFor(type);
         PagingAndSortingQuery qry = queryStatements.findOne(id,depth);
 
@@ -50,7 +50,7 @@ public class LoadOneDelegate implements Capability.LoadOne {
         }
     }
 
-    private <T> T lookup(Class<T> type, Long id) {
+    private <T> T lookup(Class<T> type, Object id) {
         Object ref;
         ClassInfo typeInfo = session.metaData().classInfo(type.getName());
         if (typeInfo.annotationsInfo().get(RelationshipEntity.CLASS) == null) {

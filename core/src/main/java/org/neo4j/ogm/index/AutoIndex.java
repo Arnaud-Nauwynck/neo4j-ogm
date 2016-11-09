@@ -23,7 +23,7 @@ import org.neo4j.ogm.session.request.RowDataStatement;
  *
  * @author Mark Angrish
  */
-class Index {
+class AutoIndex {
 
 	private static final Map<String, Object> EMPTY_MAP = Collections.emptyMap();
 
@@ -32,7 +32,7 @@ class Index {
 	 */
 	private final String description;
 
-	public Index(String label, String property, boolean unique) {
+	public AutoIndex(String label, String property, boolean unique) {
 
 		if (unique) {
 			this.description = "CONSTRAINT ON ( " + label.toLowerCase() + ":" + label + " ) ASSERT " + label.toLowerCase() + "." + property + " IS UNIQUE";
@@ -58,9 +58,9 @@ class Index {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 
-		Index index = (Index) o;
+		AutoIndex autoIndex = (AutoIndex) o;
 
-		return description != null ? description.equals(index.description) : index.description == null;
+		return description != null ? description.equals(autoIndex.description) : autoIndex.description == null;
 	}
 
 	@Override

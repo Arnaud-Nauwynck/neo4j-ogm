@@ -66,7 +66,7 @@ public class MappingContext {
         this.labelHistoryRegister = new LabelHistoryRegister();
     }
 
-    public Object getNodeEntity(Long id) {
+    public Object getNodeEntity(Object id) {
         return nodeEntityRegister.get(id);
     }
 
@@ -147,7 +147,7 @@ public class MappingContext {
         labelHistoryRegister.clear();
     }
 
-    public Object getRelationshipEntity(Long relationshipId) {
+    public Object getRelationshipEntity(Object relationshipId) {
         return relationshipEntityRegister.get(relationshipId);
     }
 
@@ -288,9 +288,9 @@ public class MappingContext {
      * @param startOrEndEntity the entity that might be the start or end node of a relationship entity
      */
     private void deregisterDependentRelationshipEntity(Object startOrEndEntity) {
-        Iterator<Long> relationshipEntityIdIterator = relationshipEntityRegister.iterator();
+        Iterator<Object> relationshipEntityIdIterator = relationshipEntityRegister.iterator();
         while (relationshipEntityIdIterator.hasNext()) {
-            Long relationshipEntityId = relationshipEntityIdIterator.next();
+            Object relationshipEntityId = relationshipEntityIdIterator.next();
             Object relationshipEntity = relationshipEntityRegister.get(relationshipEntityId);
             RelationalReader startNodeReader = EntityAccessManager.getStartNodeReader(metaData.classInfo(relationshipEntity));
             RelationalReader endNodeReader = EntityAccessManager.getEndNodeReader(metaData.classInfo(relationshipEntity));

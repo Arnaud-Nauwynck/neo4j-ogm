@@ -177,31 +177,6 @@ public abstract class AbstractDriverTestSuite {
         assertTrue(result.queryResults().iterator().hasNext());
     }
 
-    // concurrent access tests
-    @Test
-    public void shouldSupportMultipleConcurrentThreads() throws InterruptedException {
-
-        ExecutorService executor = Executors.newFixedThreadPool(10);
-        final CountDownLatch latch = new CountDownLatch(100);
-
-        for (int i = 0; i < 100; i++) {
-            executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    session.save(new User());
-                    latch.countDown();
-                }
-            });
-        }
-
-        latch.await(); // pause until 100 users
-
-        executor.shutdown();
-
-        assertEquals(100, session.countEntitiesOfType(User.class));
-
-    }
-
     // transactional tests
     @Test
     public void shouldFindExplicitlyCommittedEntity() {

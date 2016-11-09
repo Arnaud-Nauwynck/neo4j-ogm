@@ -39,23 +39,23 @@ import org.slf4j.LoggerFactory;
  *
  * @author Mark Angrish
  */
-public class IndexManager {
+public class AutoIndexManager {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ClassInfo.class);
 
 	private static final Map<String, Object> EMPTY_MAP = Collections.emptyMap();
 
-	private final List<Index> indexes;
+	private final List<AutoIndex> autoIndices;
 
 	private final AutoIndexMode mode;
 
 	private final Driver driver;
 
-	public IndexManager(MetaData metaData, Driver driver) {
+	public AutoIndexManager(MetaData metaData, Driver driver) {
 
 		this.driver = initialiseDriver(driver);
 		this.mode = Components.autoIndexMode();
-		this.indexes = initialiseIndexMetadata(metaData);
+		this.autoIndices = initialiseIndexMetadata(metaData);
 	}
 
 	private Driver initialiseDriver(Driver driver) {
@@ -63,24 +63,24 @@ public class IndexManager {
 		return driver;
 	}
 
-	private List<Index> initialiseIndexMetadata(MetaData metaData) {
+	private List<AutoIndex> initialiseIndexMetadata(MetaData metaData) {
 		LOGGER.debug("Building Index Metadata.");
-		List<Index> indexMetadata = new ArrayList<>();
+		List<AutoIndex> autoIndexMetadata = new ArrayList<>();
 		for (ClassInfo classInfo : metaData.persistentEntities()) {
 
 			if (classInfo.containsIndexes()) {
 				for (FieldInfo fieldInfo : classInfo.getIndexFields()) {
-					final Index index = new Index(classInfo.neo4jName(), fieldInfo.property(), fieldInfo.isConstraint());
-					LOGGER.debug("Adding Index [description={}]", index);
-					indexMetadata.add(index);
+					final AutoIndex autoIndex = new AutoIndex(classInfo.neo4jName(), fieldInfo.property(), fieldInfo.isConstraint());
+					LOGGER.debug("Adding Index [description={}]", autoIndex);
+					autoIndexMetadata.add(autoIndex);
 				}
 			}
 		}
-		return indexMetadata;
+		return autoIndexMetadata;
 	}
 
-	public List<Index> getIndexes() {
-		return indexes;
+	public List<AutoIndex> getAutoIndices() {
+		return autoIndices;
 	}
 
 	/**
@@ -104,8 +104,8 @@ public class IndexManager {
 		final String newLine = System.lineSeparator();
 
 		StringBuilder sb = new StringBuilder();
-		for (Index index : indexes) {
-			sb.append(index.getCreateStatement().getStatement()).append(newLine);
+		for (AutoIndex autoIndex : autoIndices) {
+			sb.append(autoIndex.getCreateStatement().getStatement()).append(newLine);
 		}
 
 		File file = new File(Components.getConfiguration().autoIndexConfiguration().getDumpDir(),
@@ -132,7 +132,7 @@ public class IndexManager {
 		LOGGER.debug("Validating Indexes");
 
 		DefaultRequest indexRequests = buildProcedures();
-		List<Index> copyOfIndexes = new ArrayList<>(indexes);
+		List<AutoIndex> copyOfAutoIndices = new ArrayList<>(autoIndices);
 
 		try (Response<RowModel> response = driver.request().execute(indexRequests)) {
 			RowModel rowModel;
@@ -140,19 +140,19 @@ public class IndexManager {
 				if (rowModel.getValues().length == 3 && rowModel.getValues()[2].equals("node_unique_property")) {
 					continue;
 				}
-				for (Index index : indexes) {
-					if (index.getDescription().equals(rowModel.getValues()[0])) {
-						copyOfIndexes.remove(index);
+				for (AutoIndex autoIndex : autoIndices) {
+					if (autoIndex.getDescription().equals(rowModel.getValues()[0])) {
+						copyOfAutoIndices.remove(autoIndex);
 					}
 				}
 			}
 		}
 
-		if (!copyOfIndexes.isEmpty()) {
+		if (!copyOfAutoIndices.isEmpty()) {
 
 			String missingIndexes = "[";
 
-			for (Index s : copyOfIndexes) {
+			for (AutoIndex s : copyOfAutoIndices) {
 				missingIndexes += s.getDescription() + ", ";
 			}
 			missingIndexes += "]";
@@ -207,8 +207,8 @@ public class IndexManager {
 	private void create() {
 		// build indexes according to metadata
 		List<Statement> statements = new ArrayList<>();
-		for (Index index : indexes) {
-			final Statement createStatement = index.getCreateStatement();
+		for (AutoIndex autoIndex : autoIndices) {
+			final Statement createStatement = autoIndex.getCreateStatement();
 			LOGGER.debug("[{}] added to create statements.", createStatement);
 			statements.add(createStatement);
 		}

@@ -27,4 +27,6 @@ public interface Node {
     Long getId();
 
     List<Property<String, Object>> getPropertyList();
+
+    String getPrimaryIndex();
 }
