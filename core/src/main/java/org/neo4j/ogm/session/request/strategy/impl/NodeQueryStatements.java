@@ -19,6 +19,7 @@ import org.neo4j.ogm.cypher.Filters;
 import org.neo4j.ogm.cypher.query.DefaultGraphModelRequest;
 import org.neo4j.ogm.cypher.query.DefaultGraphRowListModelRequest;
 import org.neo4j.ogm.cypher.query.PagingAndSortingQuery;
+import org.neo4j.ogm.metadata.FieldInfo;
 import org.neo4j.ogm.session.Utils;
 import org.neo4j.ogm.session.request.FilteredQuery;
 import org.neo4j.ogm.session.request.FilteredQueryBuilder;
@@ -30,18 +31,31 @@ import org.neo4j.ogm.session.request.strategy.QueryStatements;
  */
 public class NodeQueryStatements implements QueryStatements {
 
+    private final FieldInfo primaryIndexField;
+
+    public NodeQueryStatements(FieldInfo primaryIndexField) {
+
+        this.primaryIndexField = primaryIndexField;
+    }
+
     @Override
     public PagingAndSortingQuery findOne(Object id, int depth) {
         int max = max(depth);
         int min = min(max);
         if (depth < 0) {
-            return InfiniteDepthReadStrategy.findOne(id);
+            return InfiniteDepthReadStrategy.findOne(id, primaryIndexField);
         }
         if (max > 0) {
-            String qry = String.format("MATCH (n) WHERE ID(n) = { id } WITH n MATCH p=(n)-[*%d..%d]-(m) RETURN p", min, max);
+            String qry;
+            if (primaryIndexField != null) {
+                qry =  String.format("MATCH (n) WHERE n." + primaryIndexField.getName() + " = { id } WITH n MATCH p=(n)-[*%d..%d]-(m) RETURN p", min, max);
+            }
+            else {
+                qry = String.format("MATCH (n) WHERE ID(n) = { id } WITH n MATCH p=(n)-[*%d..%d]-(m) RETURN p", min, max);
+            }
             return new DefaultGraphModelRequest(qry, Utils.map("id", id));
         } else {
-            return DepthZeroReadStrategy.findOne(id);
+            return DepthZeroReadStrategy.findOne(id, primaryIndexField);
         }
     }
 
@@ -121,7 +135,10 @@ public class NodeQueryStatements implements QueryStatements {
 
     private static class DepthZeroReadStrategy {
 
-        public static DefaultGraphModelRequest findOne(Object id) {
+        public static DefaultGraphModelRequest findOne(Object id,  FieldInfo primaryIndexField) {
+            if (primaryIndexField != null) {
+                return new DefaultGraphModelRequest("MATCH (n) WHERE n." + primaryIndexField.getName() + " = { id } RETURN n", Utils.map("id", id));
+            }
             return new DefaultGraphModelRequest("MATCH (n) WHERE ID(n) = { id } RETURN n", Utils.map("id", id));
         }
 
@@ -148,7 +165,10 @@ public class NodeQueryStatements implements QueryStatements {
 
     private static class InfiniteDepthReadStrategy {
 
-        public static DefaultGraphModelRequest findOne(Object id) {
+        public static DefaultGraphModelRequest findOne(Object id, FieldInfo primaryIndexField) {
+            if (primaryIndexField != null) {
+                return new DefaultGraphModelRequest("MATCH (n) WHERE n." + primaryIndexField.getName() + " = { id } WITH n MATCH p=(n)-[*0..]-(m) RETURN p", Utils.map("id", id));
+            }
             return new DefaultGraphModelRequest("MATCH (n) WHERE ID(n) = { id } WITH n MATCH p=(n)-[*0..]-(m) RETURN p", Utils.map("id", id));
         }
 

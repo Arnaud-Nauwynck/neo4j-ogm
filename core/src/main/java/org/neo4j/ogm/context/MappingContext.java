@@ -66,11 +66,20 @@ public class MappingContext {
         this.labelHistoryRegister = new LabelHistoryRegister();
     }
 
+    public Object getNodeEntity(Class<?> type, Object id) {
+        final FieldInfo primaryIndexField = metaData.classInfo(type).primaryIndexField();
+
+        if (primaryIndexField != null) {
+//            nodeEntityRegister.
+        }
+        return nodeEntityRegister.get(id);
+    }
+
     public Object getNodeEntity(Object id) {
         return nodeEntityRegister.get(id);
     }
 
-    public Object addNodeEntity(Object entity, Long id) {
+    public Object addNodeEntity(Object entity, Object id) {
         if (nodeEntityRegister.add(id, entity)) {
             entity = nodeEntityRegister.get(id);
             addType(entity.getClass(), entity, id);
@@ -363,7 +372,7 @@ public class MappingContext {
         }
     }
 
-    private void addType(Class type, Object entity, Long id) {
+    private void addType(Class type, Object entity, Object id) {
         typeRegister.add(metaData, type, entity, id);
     }
 

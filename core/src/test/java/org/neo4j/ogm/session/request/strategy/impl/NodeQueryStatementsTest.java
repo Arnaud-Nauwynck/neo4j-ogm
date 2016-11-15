@@ -36,7 +36,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class NodeQueryStatementsTest {
 
-	private final QueryStatements queryStatements = new NodeQueryStatements();
+	private final QueryStatements queryStatements = new NodeQueryStatements(null);
 
 	@Test
 	public void testFindOne() throws Exception {

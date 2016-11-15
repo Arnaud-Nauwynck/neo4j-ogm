@@ -31,6 +31,7 @@ public class User {
 
     @Index(unique = true)
     String login;
+
     String name;
     String password;
 
